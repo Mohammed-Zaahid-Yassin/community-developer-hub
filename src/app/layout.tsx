@@ -49,7 +49,11 @@ export default function RootLayout({
             <Suspense fallback={<div className="h-16 w-full border-b border-neutral-200 dark:border-neutral-800" />}>
               <Navbar />
             </Suspense>
-            <main className="flex-1 w-full">{children}</main>
+            <main className="flex-1 w-full">
+              <Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center text-xs text-neutral-400">Loading platform...</div>}>
+                {children}
+              </Suspense>
+            </main>
             <Footer />
           </AuthProvider>
         </ThemeProvider>
