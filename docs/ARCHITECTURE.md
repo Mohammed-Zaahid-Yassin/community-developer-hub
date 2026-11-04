@@ -81,3 +81,4 @@ Unlike platforms that award streaks for superficial page visits, this engine enf
 - **Explicit RLS Policies**: Every table has RLS enabled with separate rules for SELECT, INSERT, UPDATE, and DELETE.
 - **Self-Rating Prevention**: A database constraint and server action guard prevent project creators from reviewing their own projects.
 - **Ownership Verification**: Team removal, task edits, and project updates verify that the active authenticated session matches the creator or assigned collaborator.
+

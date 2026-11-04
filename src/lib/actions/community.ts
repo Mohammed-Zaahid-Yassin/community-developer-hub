@@ -191,3 +191,4 @@ export async function createChallengeAction(
   revalidatePath("/challenges");
   return { success: true, challenge };
 }
+

@@ -1131,3 +1131,4 @@ export default function ProjectShowcasePage({ params }: ProjectPageProps) {
     </Suspense>
   );
 }
+

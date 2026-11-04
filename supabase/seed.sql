@@ -43,3 +43,4 @@ INSERT INTO public.platform_settings (key, value, description) VALUES
 ('points_rules', '{"project_create": 50, "project_complete": 100, "project_update": 15, "task_completed": 10, "substantive_review": 20, "accepted_contribution": 30, "challenge_submission": 40}'::jsonb, 'Configurable point values for qualifying actions'),
 ('streak_qualifiers', '{"actions": ["project_update", "accepted_contribution", "task_completed", "substantive_review", "challenge_submission"]}'::jsonb, 'List of activities that qualify for daily streak increments')
 ON CONFLICT (key) DO NOTHING;
+

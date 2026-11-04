@@ -63,3 +63,4 @@ export const branding: BrandingConfig = {
     accentColor: "#6366f1", // Indigo
   },
 };
+

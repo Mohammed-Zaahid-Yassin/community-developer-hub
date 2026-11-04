@@ -335,3 +335,4 @@ export interface PlatformSetting {
   updated_by: string | null;
   updated_at: string;
 }
+

@@ -50,3 +50,4 @@ node scripts/verify-platform.mjs
 | **UI-02** | Dark Theme | OLED-friendly deep slate `#090d16` background with vivid accents | ✓ |
 | **UI-03** | Mobile Viewport (375px) | Responsive hamburger drawer, stacked cards, full touch usability | ✓ |
 | **UI-04** | Empty States | Informative empty state cards with helpful call-to-actions | ✓ |
+

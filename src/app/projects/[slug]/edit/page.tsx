@@ -366,3 +366,4 @@ export default function EditProjectPage({ params }: EditProjectProps) {
     </Suspense>
   );
 }
+
