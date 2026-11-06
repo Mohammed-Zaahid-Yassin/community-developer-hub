@@ -74,15 +74,22 @@ async function runBrowserTest() {
   console.log(`  ✓ Rendered /community with ${devCards} developer availability tags`);
 
   // Navigate to /auth/login
-  console.log("\n7. Testing /auth/login Page...");
+  console.log("\n7. Testing /auth/login Page & Google OAuth Button...");
   await page.goto(`${baseUrl}/auth/login`, { waitUntil: "networkidle" });
+  const googleLoginBtn = await page.locator("button:has-text('Continue with Google')").isVisible();
   const emailInput = await page.locator("input[type='email']").isVisible();
   const passwordInput = await page.locator("input[type='password']").isVisible();
   const submitButton = await page.locator("button[type='submit']").isVisible();
-  console.log(`  ✓ Login form rendered: email=${emailInput}, password=${passwordInput}, submit=${submitButton}`);
+  console.log(`  ✓ Login form rendered: googleBtn=${googleLoginBtn}, email=${emailInput}, password=${passwordInput}, submit=${submitButton}`);
+
+  // Navigate to /auth/register
+  console.log("\n8. Testing /auth/register Page & Google OAuth Button...");
+  await page.goto(`${baseUrl}/auth/register`, { waitUntil: "networkidle" });
+  const googleRegisterBtn = await page.locator("button:has-text('Continue with Google')").isVisible();
+  console.log(`  ✓ Register form rendered: googleBtn=${googleRegisterBtn}`);
 
   // Test invalid login error handling
-  console.log("\n8. Testing Interactive Error Handling on Login...");
+  console.log("\n9. Testing Interactive Error Handling on Login...");
   await page.fill("input[type='email']", "invalid_test_audit@example.com");
   await page.fill("input[type='password']", "WrongPassword999!");
   await page.click("button[type='submit']");

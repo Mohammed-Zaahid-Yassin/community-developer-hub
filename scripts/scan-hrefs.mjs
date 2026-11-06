@@ -26,3 +26,4 @@ scanDir('src');
 const list = Array.from(allHrefs).map(s => JSON.parse(s));
 list.sort((a,b) => a.href.localeCompare(b.href));
 console.log(JSON.stringify(list, null, 2));
+

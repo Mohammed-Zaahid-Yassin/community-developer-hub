@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { branding } from "@/config/branding";
+import { GoogleIcon } from "@/components/icons";
 import {
   Terminal,
   Lock,
@@ -31,11 +32,39 @@ function RegisterForm() {
   const [inviteCode, setInviteCode] = useState(inviteCodeParam);
   const [registrationMode, setRegistrationMode] = useState<"open" | "invite_only" | "admin_approved">("open");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [needsVerification, setNeedsVerification] = useState(false);
   const [resending, setResending] = useState(false);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const supabase = createClient();
+      const callbackUrl = `${window.location.origin}/auth/callback?next=/profile/edit`;
+      const { data, error: oauthErr } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: callbackUrl,
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+        },
+      });
+
+      if (oauthErr) {
+        setError(oauthErr.message);
+        setGoogleLoading(false);
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to initiate Google sign-up.");
+      setGoogleLoading(false);
+    }
+  };
 
   // Check platform registration mode
   useEffect(() => {
@@ -134,7 +163,12 @@ function RegisterForm() {
       });
 
       if (signUpError) {
-        setError(signUpError.message);
+        const msg = signUpError.message.toLowerCase();
+        if (msg.includes("disabled") || msg.includes("not allowed")) {
+          setError("Email registration is currently disabled on this project. Please sign up with your Google/Gmail account above.");
+        } else {
+          setError(signUpError.message);
+        }
         setLoading(false);
         return;
       }
@@ -249,7 +283,35 @@ function RegisterForm() {
       )}
 
       {!needsVerification && (
-        <form onSubmit={handleRegister} className="space-y-4">
+        <>
+          {/* Google OAuth Register Button */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading || loading}
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-750 text-neutral-800 dark:text-neutral-100 font-semibold text-xs transition shadow-sm hover:shadow disabled:opacity-50"
+          >
+            {googleLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />
+            ) : (
+              <GoogleIcon className="w-4 h-4" />
+            )}
+            <span>Continue with Google</span>
+          </button>
+
+          {/* Or Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-neutral-200 dark:border-neutral-800" />
+            </div>
+            <div className="relative flex justify-center text-[11px] uppercase tracking-wider">
+              <span className="bg-white dark:bg-neutral-900 px-3 text-neutral-400 font-medium">
+                Or register with email
+              </span>
+            </div>
+          </div>
+
+          <form onSubmit={handleRegister} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
               Full Name *
@@ -359,6 +421,7 @@ function RegisterForm() {
             )}
           </button>
         </form>
+      </>
       )}
 
       <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-neutral-800 text-center">

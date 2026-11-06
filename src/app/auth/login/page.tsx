@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { branding } from "@/config/branding";
+import { GoogleIcon } from "@/components/icons";
 import {
   Terminal,
   Lock,
@@ -22,15 +23,44 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
+  const urlError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(urlError);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [unconfirmedEmail, setUnconfirmedEmail] = useState(false);
   const [resending, setResending] = useState(false);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const supabase = createClient();
+      const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}`;
+      const { data, error: oauthErr } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: callbackUrl,
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+        },
+      });
+
+      if (oauthErr) {
+        setError(oauthErr.message);
+        setGoogleLoading(false);
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to initiate Google sign-in.");
+      setGoogleLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,11 +77,14 @@ function LoginForm() {
       });
 
       if (signInError) {
-        if (signInError.message.toLowerCase().includes("email not confirmed")) {
+        const msg = signInError.message.toLowerCase();
+        if (msg.includes("email not confirmed")) {
           setUnconfirmedEmail(true);
           setError("Your email address has not been confirmed yet. Please check your inbox for the verification email.");
-        } else if (signInError.message.toLowerCase().includes("invalid login credentials")) {
-          setError("Invalid email or password. Please verify your credentials and try again.");
+        } else if (msg.includes("disabled") || msg.includes("not allowed")) {
+          setError("Email password login is currently disabled on this project. Please use 'Continue with Google' above.");
+        } else if (msg.includes("invalid login credentials")) {
+          setError("Invalid email or password. Please verify your credentials or sign in with Google.");
         } else {
           setError(signInError.message);
         }
@@ -147,6 +180,33 @@ function LoginForm() {
           )}
         </div>
       )}
+
+      {/* Google OAuth Login Button */}
+      <button
+        type="button"
+        onClick={handleGoogleLogin}
+        disabled={googleLoading || loading}
+        className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-750 text-neutral-800 dark:text-neutral-100 font-semibold text-xs transition shadow-sm hover:shadow disabled:opacity-50"
+      >
+        {googleLoading ? (
+          <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />
+        ) : (
+          <GoogleIcon className="w-4 h-4" />
+        )}
+        <span>Continue with Google</span>
+      </button>
+
+      {/* Or Divider */}
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-neutral-200 dark:border-neutral-800" />
+        </div>
+        <div className="relative flex justify-center text-[11px] uppercase tracking-wider">
+          <span className="bg-white dark:bg-neutral-900 px-3 text-neutral-400 font-medium">
+            Or continue with email
+          </span>
+        </div>
+      </div>
 
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
