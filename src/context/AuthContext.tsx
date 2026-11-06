@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { User } from "@supabase/supabase-js";
+import { User, AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { Profile, UserRoleType } from "@/types/database";
 
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (session?.user) {
         setUser(session.user);
         await fetchProfileAndRole(session.user.id);

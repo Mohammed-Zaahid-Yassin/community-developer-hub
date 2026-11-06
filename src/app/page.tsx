@@ -68,89 +68,84 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-28 border-b border-neutral-200/80 dark:border-neutral-800/80 bg-white/50 dark:bg-neutral-950/50">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(99,102,241,0.15),rgba(255,255,255,0))] pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          {/* Affiliation Pill */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 shadow-xs mb-6">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-            <span>The Official Hub for {branding.communityAffiliation} Developers</span>
+      <section className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Authentic Community Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-neutral-200/80 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-neutral-300 dark:border-neutral-700 mb-6">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Developer Exchange & Project Showcase for {branding.communityAffiliation}</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-neutral-900 dark:text-white max-w-4xl mx-auto leading-[1.1]">
-            Showcase What You Build.{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600">
-              Collaborate and Elevate
-            </span>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-neutral-900 dark:text-white max-w-4xl mx-auto leading-tight">
+            Build Software in Public. Collaborate Across Teams.
           </h1>
 
-          <p className="mt-5 text-sm sm:text-base text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto leading-relaxed">
-            {branding.tagline}. Build an auditable developer portfolio, maintain authentic coding streaks, recruit collaborators with targeted technical skills, and get recognized through Community Spotlight.
+          <p className="mt-4 text-sm sm:text-base text-neutral-600 dark:text-neutral-300 max-w-2xl mx-auto leading-relaxed">
+            {branding.description}
           </p>
 
           {/* Action CTAs */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/projects"
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-md shadow-indigo-500/20 transition-all hover:scale-[1.02]"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition hover:scale-[1.01]"
             >
               <Compass className="w-4 h-4" />
-              <span>Explore Projects Showcase</span>
+              <span>Explore Projects</span>
             </Link>
 
             <Link
               href="/projects/new"
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 text-xs sm:text-sm font-semibold transition-all hover:scale-[1.02]"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 text-xs sm:text-sm font-semibold transition"
             >
               <Code2 className="w-4 h-4" />
-              <span>Publish Your Project</span>
+              <span>Publish Project</span>
             </Link>
 
             <Link
               href="/collaborate"
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 text-xs sm:text-sm font-semibold transition-all hover:scale-[1.02]"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 text-xs sm:text-sm font-semibold transition"
             >
               <Users className="w-4 h-4" />
-              <span>Find Collaborators</span>
+              <span>Open Roles</span>
             </Link>
           </div>
 
-          {/* Real Live Metrics Bar */}
-          <div className="mt-14 max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-3xl bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800/90 shadow-sm">
+          {/* Real Live Metrics Bar - Pure Database Data */}
+          <div className="mt-12 max-w-3xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-sm">
             <div className="p-3 text-center">
               <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 dark:text-white">
-                {membersCount || "50+"}
+                {membersCount ?? 0}
               </span>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 font-medium">
-                Active Developers
+                Registered Builders
               </p>
             </div>
 
             <div className="p-3 text-center border-l border-neutral-100 dark:border-neutral-800">
               <span className="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">
-                {projectsCount || "25+"}
+                {projectsCount ?? 0}
               </span>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 font-medium">
-                Projects Showcase
+                Live Projects
               </p>
             </div>
 
             <div className="p-3 text-center border-l border-neutral-100 dark:border-neutral-800">
               <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 dark:text-white">
-                {collaborationsCount || "10+"}
+                {collaborationsCount ?? 0}
               </span>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 font-medium">
-                Open Roles
+                Open Collaborations
               </p>
             </div>
 
             <div className="p-3 text-center border-l border-neutral-100 dark:border-neutral-800">
-              <span className="text-2xl sm:text-3xl font-extrabold text-amber-500">
+              <span className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
                 100%
               </span>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 font-medium">
-                Community Driven
+                Open Source
               </p>
             </div>
           </div>

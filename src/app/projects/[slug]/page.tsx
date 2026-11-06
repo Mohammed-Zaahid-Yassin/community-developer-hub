@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, use, Suspense } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -51,6 +51,7 @@ interface ProjectPageProps {
 }
 
 function ProjectShowcaseContent({ params }: ProjectPageProps) {
+  const router = useRouter();
   const resolvedParams = use(params);
   const slug = decodeURIComponent(resolvedParams.slug);
   const { user, profile } = useAuth();
@@ -197,7 +198,10 @@ function ProjectShowcaseContent({ params }: ProjectPageProps) {
   const isOwner = user && project.creator_id === user.id;
 
   const handleLike = async () => {
-    if (!user) return;
+    if (!user) {
+      router.push(`/auth/login?redirect=/projects/${project.slug}`);
+      return;
+    }
     const prev = isLiked;
     setIsLiked(!prev);
     setLikesCount((c) => (prev ? c - 1 : c + 1));
@@ -205,7 +209,10 @@ function ProjectShowcaseContent({ params }: ProjectPageProps) {
   };
 
   const handleBookmark = async () => {
-    if (!user) return;
+    if (!user) {
+      router.push(`/auth/login?redirect=/projects/${project.slug}`);
+      return;
+    }
     const prev = isBookmarked;
     setIsBookmarked(!prev);
     await toggleBookmarkProjectAction(project.id);
@@ -221,7 +228,11 @@ function ProjectShowcaseContent({ params }: ProjectPageProps) {
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || !user) return;
+    if (!user) {
+      router.push(`/auth/login?redirect=/projects/${project.slug}`);
+      return;
+    }
+    if (!newComment.trim()) return;
     setSubmittingComment(true);
 
     const res = await addProjectCommentAction(project.id, newComment, replyParentId || undefined);

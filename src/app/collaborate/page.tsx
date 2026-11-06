@@ -83,8 +83,8 @@ function CollaborateMarketplaceContent() {
 
         // If apply query param is set, pre-select opportunity
         if (applyParam && opps) {
-          const match = opps.find((o) => o.id === applyParam);
-          if (match) setSelectedOpp(match as CollaborationOpportunity);
+          const match = (opps as CollaborationOpportunity[]).find((o) => o.id === applyParam);
+          if (match) setSelectedOpp(match);
         }
 
         // 2. If user is logged in, fetch their applications

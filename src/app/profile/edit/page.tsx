@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { createClient } from "@/lib/supabase/client";
 import { AvailabilityType, CollaborationStyleType } from "@/types/database";
+import { ImageUpload } from "@/components/ImageUpload";
 import {
   User,
   AtSign,
@@ -258,17 +259,14 @@ export default function EditProfilePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                Profile Avatar URL
-              </label>
-              <input
-                type="url"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                placeholder="https://example.com/avatar.jpg"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              <ImageUpload
+                bucket="avatars"
+                label="Profile Avatar Picture"
+                aspectRatio="square"
+                currentUrl={avatarUrl}
+                onUpload={(url) => setAvatarUrl(url)}
+                maxSizeMb={2}
               />
-              <p className="text-[11px] text-neutral-500 mt-1">Direct image URL (e.g., GitHub avatar or Cloud storage)</p>
             </div>
 
             <div>

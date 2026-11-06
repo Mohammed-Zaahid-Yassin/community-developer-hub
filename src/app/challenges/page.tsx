@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { createClient } from "@/lib/supabase/client";
 import { Challenge, ChallengeSubmission, Project } from "@/types/database";
@@ -26,6 +27,7 @@ import {
 } from "lucide-react";
 
 function ChallengesContent() {
+  const router = useRouter();
   const { user } = useAuth();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [submissions, setSubmissions] = useState<Record<string, ChallengeSubmission[]>>({});
@@ -86,7 +88,7 @@ function ChallengesContent() {
             setSelectedProjectToSubmit(projs[0].id);
           }
           if (parts) {
-            setJoinedChallenges(parts.map((p) => p.challenge_id));
+            setJoinedChallenges(parts.map((p: { challenge_id: string }) => p.challenge_id));
           }
         }
       } catch (err) {
@@ -100,7 +102,10 @@ function ChallengesContent() {
   }, [user]);
 
   const handleJoin = async (challengeId: string) => {
-    if (!user) return;
+    if (!user) {
+      router.push("/auth/login?redirect=/challenges");
+      return;
+    }
     await joinChallengeAction(challengeId);
     setJoinedChallenges([...joinedChallenges, challengeId]);
   };
@@ -208,8 +213,7 @@ function ChallengesContent() {
 
                         <button
                           onClick={() => setSelectedChallenge(ch)}
-                          disabled={userProjects.length === 0}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold shadow-sm transition"
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition"
                         >
                           <Send className="w-3.5 h-3.5" />
                           <span>Submit Project (+40 pts)</span>
@@ -307,6 +311,22 @@ function ChallengesContent() {
               <div className="my-6 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 shrink-0" />
                 <span>Project submitted successfully! +40 points awarded and streak updated!</span>
+              </div>
+            ) : userProjects.length === 0 ? (
+              <div className="my-6 p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-center space-y-3">
+                <AlertCircle className="w-8 h-8 text-amber-600 dark:text-amber-400 mx-auto" />
+                <h4 className="text-xs font-bold text-amber-900 dark:text-amber-200">No Projects Found</h4>
+                <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
+                  You must create and publish a project before entering it into a community challenge.
+                </p>
+                <div className="pt-2">
+                  <Link
+                    href="/projects/new"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-sm transition"
+                  >
+                    <span>Create Your First Project</span>
+                  </Link>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmitProject} className="mt-4 space-y-4">

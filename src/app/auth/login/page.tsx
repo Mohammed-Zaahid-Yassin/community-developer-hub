@@ -5,7 +5,18 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { branding } from "@/config/branding";
-import { Terminal, Lock, Mail, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
+import {
+  Terminal,
+  Lock,
+  Mail,
+  ArrowRight,
+  AlertCircle,
+  Loader2,
+  RefreshCw,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
@@ -14,23 +25,36 @@ function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendStatus, setResendStatus] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setUnconfirmedEmail(false);
+    setResendStatus(null);
     setLoading(true);
 
     try {
       const supabase = createClient();
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
       if (signInError) {
-        setError(signInError.message);
+        if (signInError.message.toLowerCase().includes("email not confirmed")) {
+          setUnconfirmedEmail(true);
+          setError("Your email address has not been confirmed yet. Please check your inbox for the verification email.");
+        } else if (signInError.message.toLowerCase().includes("invalid login credentials")) {
+          setError("Invalid email or password. Please verify your credentials and try again.");
+        } else {
+          setError(signInError.message);
+        }
         setLoading(false);
         return;
       }
@@ -41,7 +65,7 @@ function LoginForm() {
           .from("profiles")
           .select("is_suspended")
           .eq("id", data.user.id)
-          .single();
+          .maybeSingle();
 
         if (profile?.is_suspended) {
           await supabase.auth.signOut();
@@ -56,6 +80,31 @@ function LoginForm() {
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred during login.");
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email.trim()) return;
+    setResending(true);
+    setResendStatus(null);
+    try {
+      const supabase = createClient();
+      const { error: resendErr } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (resendErr) {
+        setResendStatus(`Error: ${resendErr.message}`);
+      } else {
+        setResendStatus("Verification email resent. Please check your inbox and spam folder.");
+      }
+    } catch {
+      setResendStatus("Failed to resend confirmation email.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -74,9 +123,28 @@ function LoginForm() {
       </div>
 
       {error && (
-        <div className="mb-6 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 flex items-start gap-2.5 text-xs text-red-700 dark:text-red-400">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>{error}</span>
+        <div className="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 space-y-2 text-xs text-red-700 dark:text-red-400">
+          <div className="flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+
+          {unconfirmedEmail && (
+            <div className="pt-2 border-t border-red-200/60 dark:border-red-900/40">
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resending}
+                className="inline-flex items-center gap-1.5 font-semibold text-red-800 dark:text-red-300 hover:underline"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${resending ? "animate-spin" : ""}`} />
+                <span>Resend verification email</span>
+              </button>
+              {resendStatus && (
+                <p className="text-[11px] mt-1 text-neutral-600 dark:text-neutral-300">{resendStatus}</p>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -100,12 +168,12 @@ function LoginForm() {
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+            <label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
               Password
             </label>
             <Link
               href="/auth/forgot-password"
-              className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+              className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
             >
               Forgot password?
             </Link>
@@ -113,13 +181,21 @@ function LoginForm() {
           <div className="relative">
             <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
-              className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 text-xs text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-neutral-900 transition"
+              placeholder="••••••••"
+              className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 text-xs text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-neutral-900 transition"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
         </div>
 
@@ -131,7 +207,7 @@ function LoginForm() {
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Signing in...</span>
+              <span>Authenticating...</span>
             </>
           ) : (
             <>
@@ -142,14 +218,16 @@ function LoginForm() {
         </button>
       </form>
 
-      <div className="mt-6 pt-6 border-t border-neutral-100 dark:border-neutral-800 text-center text-xs text-neutral-500">
-        New to the community?{" "}
-        <Link
-          href={`/auth/register${redirect !== "/" ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
-          className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
-        >
-          Join as a Member
-        </Link>
+      <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-neutral-800 text-center">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+          New to the developer hub?{" "}
+          <Link
+            href="/auth/register"
+            className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+          >
+            Create an account
+          </Link>
+        </p>
       </div>
     </div>
   );
@@ -158,10 +236,15 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <Suspense fallback={<div className="text-xs text-neutral-400">Loading sign in...</div>}>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center p-12">
+            <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+          </div>
+        }
+      >
         <LoginForm />
       </Suspense>
     </div>
   );
 }
-

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { createProjectAction, ProjectFormData } from "@/lib/actions/projects";
 import { ProjectStatusType } from "@/types/database";
+import { ImageUpload } from "@/components/ImageUpload";
 import {
   FolderPlus,
   Layers,
@@ -358,37 +359,29 @@ export default function NewProjectPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                Cover Image URL
-              </label>
-              <div className="relative">
-                <ImageIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-                <input
-                  type="url"
-                  value={coverImage}
-                  onChange={(e) => setCoverImage(e.target.value)}
-                  placeholder="https://images.unsplash.com/photo-..."
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
+          <div>
+            <ImageUpload
+              bucket="project-media"
+              label="Project Cover Image"
+              currentUrl={coverImage}
+              onUpload={(url) => setCoverImage(url)}
+              maxSizeMb={5}
+            />
+          </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                Demo Video URL (YouTube, Vimeo, Loom)
-              </label>
-              <div className="relative">
-                <Video className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-                <input
-                  type="url"
-                  value={demoVideoUrl}
-                  onChange={(e) => setDemoVideoUrl(e.target.value)}
-                  placeholder="https://youtube.com/watch?v=..."
-                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
+          <div>
+            <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+              Demo Video URL (YouTube, Vimeo, Loom)
+            </label>
+            <div className="relative">
+              <Video className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+              <input
+                type="url"
+                value={demoVideoUrl}
+                onChange={(e) => setDemoVideoUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+                className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 text-xs text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           </div>
 

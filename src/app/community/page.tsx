@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { createClient } from "@/lib/supabase/client";
 import { Profile, Announcement, Event } from "@/types/database";
@@ -51,6 +52,7 @@ const LEARNING_CIRCLES = [
 ];
 
 function CommunityNetworkContent() {
+  const router = useRouter();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"directory" | "events" | "announcements" | "circles">("directory");
 
@@ -97,7 +99,7 @@ function CommunityNetworkContent() {
             .select("event_id")
             .eq("user_id", user.id);
 
-          if (regList) setRegisteredEventIds(regList.map((r) => r.event_id));
+          if (regList) setRegisteredEventIds(regList.map((r: { event_id: string }) => r.event_id));
         }
       } catch (err) {
         console.error("Community load error:", err);
@@ -110,7 +112,10 @@ function CommunityNetworkContent() {
   }, [user]);
 
   const handleToggleEvent = async (eventId: string) => {
-    if (!user) return;
+    if (!user) {
+      router.push("/auth/login?redirect=/community");
+      return;
+    }
     const res = await registerForEventAction(eventId);
     if (res.success) {
       if (res.registered) {
